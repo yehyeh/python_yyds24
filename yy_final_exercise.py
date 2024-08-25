@@ -10,7 +10,7 @@ def demo(path):
     print(f"Shape of dataset.data: {dataset.data.shape}")
     print(f"Length of the dataset object: {len(dataset)}")
     print(dataset.column_names)
-    print(dataset.labels)
+    # print(dataset.labels)
     print(dataset)
 
     two_features = [0, 3]
@@ -38,6 +38,10 @@ class Dataset:
         self.data = data
         self.labels = labels
         self.column_names = column_names
+        if self.labels is not None:
+            self.num_classes = len(set(self.labels))
+        else:
+            self.num_classes = 0
 
     def load_from_path(self, path):
         df = pd.read_csv(path)
@@ -46,6 +50,7 @@ class Dataset:
         self.data = df.iloc[:, 1:len(self.column_names)].values
         self.labels = df.iloc[:, -1].values
         self.num_classes = len(set(self.labels))
+
 
     def __len__(self):
         return len(self.data)
@@ -66,9 +71,8 @@ class Dataset:
         raise StopIteration
 
     def filter_by_label(self, value):
-        print(f"filter by label: {value}")
         indices = np.where(self.labels == value)[0]
-        print(f"filter by label: {indices}")
+
         if len(indices) == 0:
             raise KeyError(f"Label '{value}' not found in the dataset")
         return Dataset(self.data[indices], self.labels[indices], self.column_names)
@@ -76,8 +80,20 @@ class Dataset:
     def plot_scatter(self, path, feature_indices):
         x = self.data[:, feature_indices[0]]
         y = self.data[:, feature_indices[1]]
-        colors = np.random.rand(self.num_classes, 3)
+
+        # colors
+        labels_set = set(self.labels)
+        get_cmap = plt.cm.get_cmap('hsv', len(labels_set))
+        colors = []
+        for label in self.labels:
+            for i, set_label in enumerate(labels_set):
+                if label == set_label:
+                    colors.append(get_cmap(i))
+
         plt.scatter(x, y, c=colors)
         plt.xlabel(self.column_names[feature_indices[0]])
         plt.ylabel(self.column_names[feature_indices[1]])
         plt.savefig(path)
+
+    def get_color(self, index):
+        return plt.cm.get_cmap('hsv', self.num_classes)(index)
