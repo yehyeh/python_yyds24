@@ -7,7 +7,7 @@ def main(argv):
         print("Usage: python main.py path/to/file.csv")
         exit(1)
 
-    csv_name = "Iris.csv"#argv[1]
+    csv_name = argv[1]
 
     yy.demo(csv_name)
 
