@@ -1,14 +1,15 @@
-# Press ⌃R to execute
-# Press Double ⇧ to search everywhere for classes, files, tool windows, actions, and settings.
-import csv
-# import string
-# import numpy as np
-# import sys
+import sys
+import rsc.yy_final_exercise as yy
 
-def create_df_from_csv(filename):
-    with open(filename, 'r') as csvfile:
-        reader = csv.reader(csvfile)
 
-csv_name = "Iris.csv"
+def main(argv):
+    # if len(argv) != 2:
+    #     print("Usage: python main.py path/to/file.csv")
+    #     exit(1)
 
-df = create_df_from_csv(csv_name)
+    csv_name = "Iris.csv" #argv[1]
+
+    yy.demo(csv_name)
+
+if __name__ == '__main__':
+    main(sys.argv)
