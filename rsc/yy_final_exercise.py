@@ -2,19 +2,33 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-
 def demo(path):
+
     dataset = Dataset()
     dataset.load_from_path(path)
 
     print(f"Shape of dataset.data: {dataset.data.shape}")
     print(f"Length of the dataset object: {len(dataset)}")
+    print(dataset.column_names)
+    print(dataset.labels)
     print(dataset)
-    dataset.plot_scatter('plot1.png', [0, 3])
+    features = [0, 3]
+    dataset.plot_scatter('plot1.png', features)
     for i, (observation, label) in enumerate(dataset):
         print(observation, label)
         if i == 3:
             break
+
+    for label in ["Iris-Error", "Iris-setosa"]:
+        print(f"filter by label: {label}")
+
+        try:
+            sub_dataset = dataset.filter_by_label(label)
+            print(sub_dataset)
+            sub_dataset.plot_scatter(f"plot_{label}.png", features)
+        except KeyError:
+            print(f"no such label")
+
 
 
 class Dataset:
@@ -35,8 +49,7 @@ class Dataset:
 
     def __str__(self):
         num_classes = len(set(self.labels))
-        return (f"A dataset object with {len(self.data)} observations,"
-                f"{len(self.column_names)} features and {num_classes} classes")
+        return f"A dataset object with {len(self.data)} observations, {len(self.column_names)} features and {num_classes} classes"
 
     def __iter__(self):
         self.index = 0
