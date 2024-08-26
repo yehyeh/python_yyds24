@@ -2,15 +2,13 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-def demo(path):
 
+def demo(path):
     dataset = Dataset()
     dataset.load_from_path(path)
 
     print(f"Shape of dataset.data: {dataset.data.shape}")
     print(f"Length of the dataset object: {len(dataset)}")
-    print(dataset.column_names)
-    # print(dataset.labels)
     print(dataset)
 
     two_features = [0, 3]
@@ -32,7 +30,6 @@ def demo(path):
             print(f"no such label")
 
 
-
 class Dataset:
     def __init__(self, data=None, labels=None, column_names=None):
         self.data = data
@@ -51,12 +48,12 @@ class Dataset:
         self.labels = df.iloc[:, -1].values
         self.num_classes = len(set(self.labels))
 
-
     def __len__(self):
         return len(self.data)
 
     def __str__(self):
-        return f"A dataset object with {len(self.data)} observations, {len(self.column_names)} features and {self.num_classes} classes"
+        return (f"A dataset object with {len(self.data)} observations,"
+                f"{len(self.column_names)} features and {self.num_classes} classes")
 
     def __iter__(self):
         self.index = 0
@@ -83,14 +80,19 @@ class Dataset:
 
         # colors
         labels_set = set(self.labels)
-        get_cmap = plt.cm.get_cmap('hsv', len(labels_set))
-        colors = []
-        for label in self.labels:
-            for i, set_label in enumerate(labels_set):
-                if label == set_label:
-                    colors.append(get_cmap(i))
 
-        plt.scatter(x, y, c=colors)
+        colors_dict = {}
+
+        get_cmap = plt.cm.get_cmap('hsv', len(labels_set))
+
+        for i, label in enumerate(labels_set):
+            colors_dict[label] = get_cmap(i)
+
+        colors_list = []
+        for label in self.labels:
+            colors_list.append(colors_dict[label])
+
+        plt.scatter(x, y, c=colors_list)
         plt.xlabel(self.column_names[feature_indices[0]])
         plt.ylabel(self.column_names[feature_indices[1]])
         plt.savefig(path)
