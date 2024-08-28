@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import random
 import matplotlib.pyplot as plt
 
 
@@ -12,22 +13,34 @@ def demo(path):
     print(dataset)
 
     two_features = [0, 3]
+
+    # Generate plot scatter:
     dataset.plot_scatter('plot1.png', two_features)
 
+    # Run snippet:
     for i, (observation, label) in enumerate(dataset):
         print(observation, label)
         if i == 3:
             break
 
+    # Filter by label, and generate plot scatter by class
     for label in ["Iris-Error", "Iris-setosa"]:
         print(f"filter by label: {label}")
 
         try:
-            sub_dataset = dataset.filter_by_label(label)
+            sub_dataset_tuple = dataset.filter_by_label(label)
+            sub_dataset = Dataset(sub_dataset_tuple[0], sub_dataset_tuple[1], sub_dataset_tuple[2])
             print(sub_dataset)
             sub_dataset.plot_scatter(f"plot_{label}.png", two_features)
         except KeyError:
             print(f"no such label")
+
+
+def generate_random_color():
+    r = round(random.uniform(0.0, 1.0), 1)
+    g = round(random.uniform(0.0, 1.0), 1)
+    b = round(random.uniform(0.0, 1.0), 1)
+    return r, g, b
 
 
 class Dataset:
@@ -69,33 +82,34 @@ class Dataset:
 
     def filter_by_label(self, value):
         indices = np.where(self.labels == value)[0]
-
+        print("indices: ", indices)
         if len(indices) == 0:
             raise KeyError(f"Label '{value}' not found in the dataset")
-        return Dataset(self.data[indices], self.labels[indices], self.column_names)
+        print("self.labels[indices]: ", self.labels[indices])
+        return self.data[indices], self.labels[indices], self.column_names
 
     def plot_scatter(self, path, feature_indices):
         x = self.data[:, feature_indices[0]]
         y = self.data[:, feature_indices[1]]
+        colors = self.colors_by_label
 
-        # colors
-        labels_set = set(self.labels)
-
-        colors_dict = {}
-
-        get_cmap = plt.cm.get_cmap('hsv', len(labels_set))
-
-        for i, label in enumerate(labels_set):
-            colors_dict[label] = get_cmap(i)
-
-        colors_list = []
-        for label in self.labels:
-            colors_list.append(colors_dict[label])
-
-        plt.scatter(x, y, c=colors_list)
+        plt.scatter(x, y, c=colors)
         plt.xlabel(self.column_names[feature_indices[0]])
         plt.ylabel(self.column_names[feature_indices[1]])
         plt.savefig(path)
+        plt.clf()
 
-    def get_color(self, index):
-        return plt.cm.get_cmap('hsv', self.num_classes)(index)
+    @property
+    def colors_by_label(self):
+        unique_labels = set(self.labels)
+
+        colors_dict = {}
+        for label in unique_labels:
+            colors_dict[label] = generate_random_color()
+
+        print("colors_dict: ", colors_dict)
+
+        colors_list = [colors_dict[label] for label in self.labels]
+        print("colors_list: ", colors_list)
+
+        return colors_list
